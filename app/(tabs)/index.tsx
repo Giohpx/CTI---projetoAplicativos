@@ -6,11 +6,11 @@ import * as ImagePicker from 'expo-image-picker';
 import Button from '@/components/Button';
 import ImageViewer from '../../components/ImageViewer';
 
-
 const PlaceholderImage = require('@/assets/images/55369954-uma-gaivota-subindo-sobre-uma-vibrante-oceano-panorama-debaixo-uma-brilhante-azul-ceu-com-fofo-nuvens-foto.jpg'); 
 
 export default function Index() {
 
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);  
   const [mensagem, setMensagem] = useState("Clique abaixo para explorar 👇");
   const [tesouros, setTesouros] = useState(0);
 
@@ -38,9 +38,10 @@ export default function Index() {
     <ScrollView style={styles.container}>
 
       <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <ImageViewer imgSource={PlaceholderImage} />
+           <View style={styles.imageContainer}>
+              <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
       </View>
+
 
       <View style={styles.footerContainer}>
         <Button label="Choose a photo" />
@@ -48,9 +49,9 @@ export default function Index() {
       </View>
     </View>
       
-      <View style={styles.imageContainer}>
-        <Image source={PlaceholderImage} style={styles.image}/>
-      </View>
+     
+
+      
 
       <Text style={styles.text}>𓆝 𓆟 𓆞 𓆝 𓆟</Text>
       <Text style={styles.title}>⋆. 𐙚˚࿔ Página Inicial 𝜗𝜚˚⋆</Text>
