@@ -1,42 +1,36 @@
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, ScrollView, TouchableOpacity, Pressable, ImageBackground } from "react-native";
 import { Image } from "expo-image";
 import { useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
 
-import Button from '@/components/Button';
-import ImageViewer from '../../components/ImageViewer';
+import Button from './components/Button';
+import ImageViewer from './components/ImageViewer';
 
 const PlaceholderImage = require('@/assets/images/55369954-uma-gaivota-subindo-sobre-uma-vibrante-oceano-panorama-debaixo-uma-brilhante-azul-ceu-com-fofo-nuvens-foto.jpg'); 
 
 export default function Index() {
 
   const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);  
-  const [mensagem, setMensagem] = useState("Clique abaixo para explorar 👇");
-  const [tesouros, setTesouros] = useState(0);
 
-  const explorarTesouro = () => {
-    setTesouros(tesouros + 1);
-    setMensagem(`🏴‍☠️ Você encontrou um tesouro! Total: ${tesouros + 1}`);
- 
-    const pickImageAsync = async () => {
+  const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ['images'], 
       allowsEditing: true,
       quality: 1,
     });
 
     if (!result.canceled) {
-      console.log(result);
+      setSelectedImage(result.assets[0].uri);
     } else {
-      alert('You did not select any image.');
+      alert('Nenhuma imagem selecionada.');
     }
-  };
-  
-  };
+  }
 
   return (
-    <ScrollView style={styles.container}>
-
+ <ScrollView
+  style={styles.scrollView}
+  contentContainerStyle={styles.container}>
+    
       <View style={styles.container}>
            <View style={styles.imageContainer}>
               <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
@@ -44,15 +38,11 @@ export default function Index() {
 
 
       <View style={styles.footerContainer}>
-        <Button label="Choose a photo" />
-        <Button label="Use this photo" />
+        <Button label="Choose a photo" onPress={pickImageAsync}/>
+        <Button label="Use this photo" onPress={pickImageAsync}/>
       </View>
     </View>
       
-     
-
-      
-
       <Text style={styles.text}>𓆝 𓆟 𓆞 𓆝 𓆟</Text>
       <Text style={styles.title}>⋆. 𐙚˚࿔ Página Inicial 𝜗𝜚˚⋆</Text>
 
@@ -69,24 +59,19 @@ export default function Index() {
         </Text>
       </View>
 
-      <Text style={styles.description}>{mensagem}</Text>
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={explorarTesouro}
-      >
-        <Text style={styles.buttonText}>CLIQUE AQUI E VEJA UMA SURPRESA ⚓</Text>
-      </TouchableOpacity>
-
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#25292e',
-    alignItems: 'center',
-  },
+  flexGrow: 1,
+  paddingBottom: 30,
+},
+  scrollView: {
+  flex: 1,
+  backgroundColor: '#25292e',
+},
   imageContainer: {
     flex: 1,
     paddingTop: 28,
@@ -102,6 +87,10 @@ const styles = StyleSheet.create({
     borderWidth: 6,
     borderColor: '#e3aa25',
   },
+  content: {
+  width: '100%',
+  alignItems: 'center',
+},
 
   text: {
     color: '#b8860b',
