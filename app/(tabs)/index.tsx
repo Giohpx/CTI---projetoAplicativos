@@ -3,8 +3,8 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
 
-import Button from './components/Button';
-import ImageViewer from './components/ImageViewer';
+import Button from '@/components/Button';
+import ImageViewer from '@/components/ImageViewer';
 
 const PlaceholderImage = require('@/assets/images/55369954-uma-gaivota-subindo-sobre-uma-vibrante-oceano-panorama-debaixo-uma-brilhante-azul-ceu-com-fofo-nuvens-foto.jpg'); 
 
