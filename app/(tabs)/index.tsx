@@ -1,155 +1,126 @@
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity, Pressable, ImageBackground } from "react-native";
-import { Image } from "expo-image";
-import { useState } from "react";
+import { ImageSourcePropType, View, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { useState, useRef } from 'react';
+import * as MediaLibrary from 'expo-media-library';
+import { captureRef } from 'react-native-view-shot';
+
 
 import Button from '@/components/Button';
 import ImageViewer from '@/components/ImageViewer';
+import IconButton from '@/components/IconButton';
+import CircleButton from '@/components/CircleButton';
+import EmojiPicker from '@/components/EmojiPicker';
+import EmojiList from '@/components/EmojiList';
+import EmojiSticker from '@/components/EmojiSticker';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const PlaceholderImage = require('@/assets/images/55369954-uma-gaivota-subindo-sobre-uma-vibrante-oceano-panorama-debaixo-uma-brilhante-azul-ceu-com-fofo-nuvens-foto.jpg'); 
+const PlaceholderImage = require('@/assets/images/background-image.png');
 
 export default function Index() {
-
-  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);  
+  
+  const imageRef = useRef (null);
+  const [status, requestPermission] = MediaLibrary.usePermissions();
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
+  const [showAppOptions, setShowAppOptions] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [pickedEmoji, setPickedEmoji] = useState<ImageSourcePropType | undefined>(undefined);
 
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
+      mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
     });
 
+    if (status === null) {
+      requestPermission();
+    }
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
+      setShowAppOptions(true);
     } else {
-      alert('Nenhuma imagem selecionada.');
+      alert('You did not select any image.');
     }
+  };
+
+  const onReset = () => {
+    setShowAppOptions(false);
+  };
+
+  const onAddSticker = () => {
+    setIsModalVisible(true);
+  };
+
+  const onModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+const onSaveImageAsync = async () => {
+  try {
+    const localUri = await captureRef(imageRef, {
+      height: 440,
+      quality: 1,
+    });
+
+    await MediaLibrary.saveToLibraryAsync(localUri);
+    if (localUri) {
+      alert('Saved!');
+    }
+  } catch (e) {
+    console.log(e);
   }
+}; 
 
-  return (
- <ScrollView
-  style={styles.scrollView}
-  contentContainerStyle={styles.container}>
-    
-      <View style={styles.container}>
-           <View style={styles.imageContainer}>
-              <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
+return (
+    <GestureHandlerRootView style={styles.container}>
+
+      <View style={styles.imageContainer}>
+        <View ref={imageRef} collapsable={false}>
+          <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
+          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+        </View> { }
       </View>
 
 
-      <View style={styles.footerContainer}>
-        <Button label="Choose a photo" onPress={pickImageAsync}/>
-        <Button label="Use this photo" onPress={pickImageAsync}/>
-      </View>
-    </View>
-      
-      <Text style={styles.text}>𓆝 𓆟 𓆞 𓆝 𓆟</Text>
-      <Text style={styles.title}>⋆. 𐙚˚࿔ Página Inicial 𝜗𝜚˚⋆</Text>
-
-      <Text style={styles.description}>
-        Bem-vindo ao nosso aplicativo de navegação! 🌊  
-        Explore os mares do conhecimento e descubra tesouros escondidos em cada aba.  
-        Navegue com facilidade e aproveite a jornada!
-      </Text>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>🌟 Dica do Dia</Text>
-        <Text style={styles.cardText}>
-          A maior força de um navegador é a curiosidade. Nunca pare de explorar e aprender!
-        </Text>
-      </View>
-
-    </ScrollView>
+      {showAppOptions ? (
+        <View style={styles.optionsContainer}>
+          <View style={styles.optionsRow}>
+            <IconButton icon="refresh" label="Reset" onPress={onReset} />
+            <CircleButton onPress={onAddSticker} />
+            <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.footerContainer}>
+          <Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
+          <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
+        </View>
+      )}
+      <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
+        <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
+      </EmojiPicker>
+    </GestureHandlerRootView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
-  flexGrow: 1,
-  paddingBottom: 30,
-},
-  scrollView: {
-  flex: 1,
-  backgroundColor: '#25292e',
-},
+    flex: 1,
+    backgroundColor: '#25292e',
+    alignItems: 'center',
+  },
   imageContainer: {
     flex: 1,
-    paddingTop: 28,
   },
   footerContainer: {
     flex: 1 / 3,
     alignItems: 'center',
   },
-
-  image: {
-    width: '100%',
-    aspectRatio: 4,
-    borderWidth: 6,
-    borderColor: '#e3aa25',
+  optionsContainer: {
+    position: 'absolute',
+    bottom: 80,
   },
-  content: {
-  width: '100%',
-  alignItems: 'center',
-},
-
-  text: {
-    color: '#b8860b',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-
-  title: {
-    color: '#b8860b',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-
-  description: {
-    color: '#fffefc',
-    fontSize: 15,
-    textAlign: 'center',
-    marginTop: 20,
-    marginHorizontal: 20,
-    lineHeight: 22,
-  },
-
-  card: {
-    backgroundColor: '#fff3d4',
-    margin: 20,
-    padding: 15,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: '#e3aa25',
-  },
-
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#b8860b',
-    marginBottom: 5,
-  },
-
-  cardText: {
-    color: '#8b6f1d',
-    fontSize: 14,
-  },
-
-  button: {
-    backgroundColor: '#e3aa25',
-    marginHorizontal: 50,
-    padding: 12,
-    borderRadius: 20,
+  optionsRow: {
     alignItems: 'center',
-    marginTop: 15,
-  },
-
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+    flexDirection: 'row',
   },
 });
