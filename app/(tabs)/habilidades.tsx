@@ -1,388 +1,222 @@
-import React, { useState } from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { Image } from "expo-image";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 
-const Banner = require("/Users/ra2457088/CTI-projetoAplicativos/assets/images/55369954-uma-gaivota-subindo-sobre-uma-vibrante-oceano-panorama-debaixo-uma-brilhante-azul-ceu-com-fofo-nuvens-foto.jpg");
-
-const frutas = [
-  {
-    nome: "Hito Hito no Mi, Modelo Nika",
-    usuario: "Monkey D. Luffy",
-    poder:
-      "Permite transformar o corpo em borracha e despertar o lendário Guerreiro da Libertação.",
-  },
-  {
-    nome: "Uo Uo no Mi",
-    usuario: "Kaido",
-    poder:
-      "Transformação em um gigantesco dragão azul capaz de controlar os céus e lançar ataques devastadores.",
-  },
-  {
-    nome: "Kage Kage no Mi",
-    usuario: "Gecko Moria",
-    poder:
-      "Permite controlar sombras, roubá-las e criar soldados extremamente poderosos.",
-  },
-  {
-    nome: "Mera Mera no Mi",
-    usuario: "Ace / Sabo",
-    poder:
-      "Permite criar, controlar e se transformar completamente em fogo.",
-  },
-  {
-    nome: "Gura Gura no Mi",
-    usuario: "Barba Branca",
-    poder:
-      "Cria terremotos gigantescos capazes de destruir ilhas inteiras.",
-  },
-  {
-    nome: "Tora Tora no Mi",
-    usuario: "Usuário Tigre",
-    poder:
-      "Permite se transformar em um tigre feroz, aumentando força e velocidade.",
-  },
+const IMAGENS = [
+  require('../../assets/images/aa.jpeg'),
+  require('../../assets/images/images (8).jpeg'),
+  require('../../assets/images/luffy.jpeg'),
+  require('../../assets/images/Marinheiros e Shichibukais.png'),
+  require('../../assets/images/why-bigger-is-better-human-giants-in-one-piece-v0-493yd4z62zv81.webp'),
+  require('../../assets/images/Dorry.jpg.webp'),
 ];
 
-const personagens = [
-  {
-    // img: require("@/assets/images/luffy.png"),
-    nome: "Monkey D. Luffy",
-    faccao: "Piratas do Chapéu de Palha",
-    fruta: "Hito Hito no Mi, Modelo Nika",
-    vida: 100,
-    forca: 98,
-    velocidade: 95,
-    inteligencia: 80,
-    recompensa: "3.000.000.000",
-    raridade: "⭐⭐⭐⭐⭐",
-  },
-  {
-    // img: require("@/assets/images/kaido.png"),
-    nome: "Kaido",
-    faccao: "Piratas das Feras",
-    fruta: "Uo Uo no Mi",
-    vida: 100,
-    forca: 100,
-    velocidade: 85,
-    inteligencia: 88,
-    recompensa: "4.611.100.000",
-    raridade: "⭐⭐⭐⭐⭐",
-  },
-  {
-    // img: require("@/assets/images/moria.png"),
-    nome: "Gecko Moria",
-    faccao: "Piratas Thriller Bark",
-    fruta: "Kage Kage no Mi",
-    vida: 80,
-    forca: 75,
-    velocidade: 60,
-    inteligencia: 82,
-    recompensa: "320.000.000",
-    raridade: "⭐⭐⭐",
-  },
-  {
-    // img: require("@/assets/images/sabo.png"),
-    nome: "Sabo",
-    faccao: "Exército Revolucionário",
-    fruta: "Mera Mera no Mi",
-    vida: 90,
-    forca: 92,
-    velocidade: 90,
-    inteligencia: 87,
-    recompensa: "Desconhecida",
-    raridade: "⭐⭐⭐⭐",
-  },
-  {
-    // img: require("@/assets/images/garp.png"),
-    nome: "Monkey D. Garp",
-    faccao: "Marinha",
-    fruta: "Nenhuma",
-    vida: 99,
-    forca: 99,
-    velocidade: 85,
-    inteligencia: 90,
-    recompensa: "Marinha",
-    raridade: "⭐⭐⭐⭐⭐",
-  },
-];
+interface Carta {
+  id: number;
+  imagem: any;
+  isFlipped: boolean;
+  isMatched: boolean;
+}
 
-export default function AkumaNoMi() {
-  const [mensagem, setMensagem] = useState("");
-  const [personagemSorteado, setPersonagemSorteado] = useState(null);
+export default function JogoDaMemoria() {
+  const [cartas, setCartas] = useState<Carta[]>([]);
+  const [escolha1, setEscolha1] = useState<Carta | null>(null);
+  const [escolha2, setEscolha2] = useState<Carta | null>(null);
+  const [bloqueiaClique, setBloqueiaClique] = useState(false);
 
-  async function buscarProfecia() {
-    try {
-      const response = await fetch(
-        "https://api.adviceslip.com/advice"
-      );
+  const iniciarJogo = () => {
+    const cartasEmbaralhadas = [...IMAGENS, ...IMAGENS]
+      .sort(() => Math.random() - 0.5)
+      .map((imagem, index) => ({
+        id: index,
+        imagem,
+        isFlipped: false,
+        isMatched: false,
+      }));
 
-      const data = await response.json();
+    setCartas(cartasEmbaralhadas);
+    setEscolha1(null);
+    setEscolha2(null);
+    setBloqueiaClique(false);
+  };
 
-      setMensagem(data.slip.advice);
-    } catch (error) {
-      Alert.alert(
-        "Erro",
-        "Não foi possível conectar à API."
-      );
+  useEffect(() => {
+    iniciarJogo();
+  }, []);
+
+  const virarCarta = (cartaClicada: Carta) => {
+    if (bloqueiaClique || cartaClicada.isFlipped || cartaClicada.isMatched) return;
+
+    const novasCartas = cartas.map((carta) =>
+      carta.id === cartaClicada.id ? { ...carta, isFlipped: true } : carta
+    );
+    setCartas(novasCartas);
+
+    if (!escolha1) {
+      setEscolha1({ ...cartaClicada, isFlipped: true });
+    } else if (!escolha2) {
+      setEscolha2({ ...cartaClicada, isFlipped: true });
     }
-  }
+  };
 
-  function sortearPersonagem() {
-    const sorteado =
-      personagens[
-        Math.floor(Math.random() * personagens.length)
-      ];
+  useEffect(() => {
+    if (escolha1 && escolha2) {
+      setBloqueiaClique(true); 
 
-    setPersonagemSorteado(sorteado);
-  }
+      if (escolha1.imagem === escolha2.imagem) {
+        setCartas((prevCartas) => {
+          const novas = prevCartas.map((carta) => {
+            if (carta.imagem === escolha1.imagem) {
+              return { ...carta, isMatched: true };
+            }
+            return carta;
+          });
+          
+          if (novas.every(c => c.isMatched)) {
+            setTimeout(() => Alert.alert('Você Venceu! 🎉', 'Parabéns, você encontrou todos os pares!', [
+              { text: 'Jogar Novamente', onPress: iniciarJogo }
+            ]), 500);
+          }
+          return novas;
+        });
+        resetarTurno();
+      } else {
+        setTimeout(() => {
+          setCartas((prevCartas) =>
+            prevCartas.map((carta) => {
+              if (carta.id === escolha1.id || carta.id === escolha2.id) {
+                return { ...carta, isFlipped: false };
+              }
+              return carta;
+            })
+          );
+          resetarTurno();
+        }, 1000);
+      }
+    }
+  }, [escolha1, escolha2]);
+
+  const resetarTurno = () => {
+    setEscolha1(null);
+    setEscolha2(null);
+    setBloqueiaClique(false);
+  };
+
+  const jogoFinalizado = cartas.length > 0 && cartas.every(carta => carta.isMatched);
 
   return (
-    <ScrollView style={styles.container}>
-      <Image source={Banner} style={styles.banner} />
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Jogo da Memória</Text>
 
-      <Text style={styles.titulo}>
-        🍎 AKUMA NO MI EXPLORER
-      </Text>
+      <View style={styles.grid}>
+        {cartas.map((carta) => (
+          <TouchableOpacity
+            key={carta.id}
+            style={[
+              styles.carta,
+              (carta.isFlipped || carta.isMatched) ? styles.cartaVirada : styles.cartaOculta
+            ]}
+            onPress={() => virarCarta(carta)}
+            activeOpacity={0.8}
+          >
+            {(carta.isFlipped || carta.isMatched) ? (
+              <Image source={carta.imagem} style={styles.imagemCarta} />
+            ) : (
+              <Text style={styles.textoOculto}>❓</Text>
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
 
-      <Text style={styles.subtitulo}>
-        Descubra as frutas mais poderosas de One Piece!
-      </Text>
-
-      <FlatList
-        data={frutas}
-        numColumns={2}
-        scrollEnabled={false}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.nome}>
-              🍎 {item.nome}
-            </Text>
-
-            <Text style={styles.usuario}>
-              👤 {item.usuario}
-            </Text>
-
-            <Text style={styles.descricao}>
-              {item.poder}
-            </Text>
-          </View>
-        )}
-      />
-
-      <TouchableOpacity
-        style={styles.botao}
-        onPress={sortearPersonagem}
-      >
-        <Text style={styles.botaoTexto}>
-          🎴 Sortear Personagem Lendário
-        </Text>
-      </TouchableOpacity>
-
-      {personagemSorteado && (
-        <View style={styles.carta}>
-          {/*
-          <Image
-            source={personagemSorteado.img}
-            style={styles.foto}
-          />
-          */}
-
-          <Text style={styles.nomeCarta}>
-            ⚔️ {personagemSorteado.nome}
-          </Text>
-
-          <Text style={styles.info}>
-            🏴 Facção: {personagemSorteado.faccao}
-          </Text>
-
-          <Text style={styles.info}>
-            🍎 Fruta: {personagemSorteado.fruta}
-          </Text>
-
-          <Text style={styles.info}>
-            🌟 Raridade: {personagemSorteado.raridade}
-          </Text>
-
-          <Text style={styles.info}>
-            ❤️ Vida: {personagemSorteado.vida}/100
-          </Text>
-
-          <Text style={styles.info}>
-            💪 Força: {personagemSorteado.forca}/100
-          </Text>
-
-          <Text style={styles.info}>
-            ⚡ Velocidade: {personagemSorteado.velocidade}/100
-          </Text>
-
-          <Text style={styles.info}>
-            🧠 Inteligência: {personagemSorteado.inteligencia}/100
-          </Text>
-
-          <Text style={styles.info}>
-            💰 Recompensa: ฿ {personagemSorteado.recompensa}
-          </Text>
+      {jogoFinalizado && (
+        <View style={styles.containerVitoria}>
+          <Text style={styles.textoVitoriaTitulo}>🏆 VOCÊ VENCEU! 🏆</Text>
+          <Text style={styles.textoVitoriaSub}>O Rei dos Piratas ficaria orgulhoso!</Text>
         </View>
       )}
 
-      <TouchableOpacity
-        style={styles.botao}
-        onPress={buscarProfecia}
-      >
-        <Text style={styles.botaoTexto}>
-          ☠️ Descobrir Profecia Pirata
-        </Text>
+      <TouchableOpacity style={styles.botaoReiniciar} onPress={iniciarJogo}>
+        <Text style={styles.textoBotao}>Reiniciar Jogo</Text>
       </TouchableOpacity>
-
-      {mensagem !== "" && (
-        <View style={styles.caixaMensagem}>
-          <Text style={styles.resultadoTitulo}>
-            🔮 Profecia Pirata
-          </Text>
-
-          <Text style={styles.mensagem}>
-            "{mensagem}"
-          </Text>
-        </View>
-      )}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#d9cfa8c4",
+    backgroundColor: '#000000',
+    alignItems: 'center',
+    paddingTop: 50,
   },
-
-  banner: {
-    width: "100%",
-    height: 180,
-    borderBottomWidth: 5,
-    borderColor: "#d2a62c",
-  },
-
   titulo: {
-    textAlign: "center",
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#b8860b",
-    marginTop: 10,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffdd04',
+    marginBottom: 20, 
   },
-
-  subtitulo: {
-    textAlign: "center",
-    color: "#5a3d00",
-    marginBottom: 10,
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10, 
+    paddingHorizontal: 10,
   },
-
-  card: {
-    width: "48%",
-    margin: "1%",
-    backgroundColor: "#fff4d6",
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 2,
-    borderColor: "#d2a62c",
-    minHeight: 180,
-  },
-
-  nome: {
-    fontWeight: "bold",
-    color: "#b8860b",
-    textAlign: "center",
-    fontSize: 14,
-  },
-
-  usuario: {
-    textAlign: "center",
-    color: "#444",
-    fontSize: 12,
-    marginTop: 5,
-  },
-
-  descricao: {
-    textAlign: "center",
-    color: "#5a3d00",
-    fontSize: 12,
-    marginTop: 8,
-  },
-
-  botao: {
-    backgroundColor: "#e3aa25",
-    marginHorizontal: 15,
-    marginVertical: 10,
-    padding: 15,
-    borderRadius: 12,
-  },
-
-  botaoTexto: {
-    textAlign: "center",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-
   carta: {
-    backgroundColor: "#fff4d6",
-    margin: 15,
-    padding: 20,
-    borderRadius: 15,
-    borderWidth: 3,
-    borderColor: "#d2a62c",
+    width: 80,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    margin: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    elevation: 3,
+    overflow: 'hidden', 
   },
-
-  foto: {
-    width: "100%",
-    height: 180,
-    borderRadius: 10,
-    marginBottom: 10,
+  cartaOculta: {
+    backgroundColor: '#dbc834',
   },
-
-  nomeCarta: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#b8860b",
-    marginBottom: 15,
+  cartaVirada: {
+    backgroundColor: '#ecf0f1',
   },
-
-  info: {
-    fontSize: 15,
-    color: "#5a3d00",
-    marginVertical: 4,
+  textoOculto: {
+    fontSize: 40,
   },
-
-  caixaMensagem: {
-    backgroundColor: "#fff4d6",
-    marginHorizontal: 15,
-    marginBottom: 20,
+  imagemCarta: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover', 
+  },
+  containerVitoria: {
+    marginTop: 20,
     padding: 15,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#d2a62c",
+    backgroundColor: '#f1c40f',
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '80%',
   },
-
-  resultadoTitulo: {
-    textAlign: "center",
-    fontWeight: "bold",
+  textoVitoriaTitulo: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 5,
+  },
+  textoVitoriaSub: {
+    fontSize: 16,
+    color: '#2c3e50',
+    textAlign: 'center',
+  },
+  botaoReiniciar: {
+    marginTop: 30,
+    backgroundColor: '#f00d0d',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+  },
+  textoBotao: {
+    color: '#ffffff',
     fontSize: 18,
-    color: "#b8860b",
-    marginBottom: 10,
-  },
-
-  mensagem: {
-    textAlign: "center",
-    color: "#5a3d00",
-    fontStyle: "italic",
+    fontWeight: 'bold',
   },
 });

@@ -94,7 +94,7 @@ export default function Index() {
       <View style={styles.imageContainer}>
         <View ref={imageRef} collapsable={false}>
           <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
-          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+          {pickedEmoji && <EmojiSticker imageSize={60} stickerSource={pickedEmoji} />}
         </View>
       </View>
 
