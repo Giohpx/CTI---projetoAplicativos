@@ -55,41 +55,53 @@ export default function Index() {
   };
 
   const onSaveImageAsync = async () => {
-    if (Platform.OS !== 'web') {
-      try {
-        const localUri = await captureRef(imageRef, {
+  if (Platform.OS !== 'web') {
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync();
+
+      if (!permission.granted) {
+        alert('Permissão negada para salvar imagens.');
+        return;
+      }
+
+      if (!imageRef.current) {
+        alert('Imagem não encontrada.');
+        return;
+      }
+
+      const localUri = await captureRef(imageRef, {
+        format: 'png',
+        quality: 1,
+      });
+
+      console.log('URI da imagem:', localUri);
+
+      await MediaLibrary.saveToLibraryAsync(localUri);
+
+      alert('Imagem salva com sucesso!');
+    } catch (error) {
+      console.error(error);
+      alert(`Erro ao salvar: ${error}`);
+    }
+  } else {
+    try {
+      if (imageRef.current) {
+        const dataUrl = await domtoimage.toJpeg(imageRef.current, {
+          quality: 0.95,
+          width: 320,
           height: 440,
-          quality: 1,
         });
 
-        await MediaLibrary.saveToLibraryAsync(localUri);
-        if (localUri) {
-          alert('Saved!');
-        }
-      } catch (e) {
-        console.log(e);
+        const link = document.createElement('a');
+        link.download = 'sticker-smash.jpeg';
+        link.href = dataUrl;
+        link.click();
       }
-    } 
-    
-    else {
-     try {
-        if (imageRef.current) {
-          const dataUrl = await domtoimage.toJpeg(imageRef.current, {
-            quality: 0.95,
-            width: 320,
-            height: 440,
-          });
-
-          let link = document.createElement('a');
-          link.download = 'sticker-smash.jpeg';
-          link.href = dataUrl;
-          link.click();
-        }
-      } catch (e) {
-        console.log(e);
-      }
+    } catch (error) {
+      console.error(error);
     }
-  };
+  }
+};
 
   return (
     <GestureHandlerRootView style={styles.container}>
