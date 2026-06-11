@@ -69,7 +69,9 @@ export default function Index() {
       } catch (e) {
         console.log(e);
       }
-    } else {
+    } 
+    
+    else {
      try {
         if (imageRef.current) {
           const dataUrl = await domtoimage.toJpeg(imageRef.current, {
