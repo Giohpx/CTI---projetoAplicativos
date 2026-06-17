@@ -20,7 +20,7 @@ export default function EmojiList({ onSelect, onCloseModal }: Props) {
     require("../assets/images/adesivo_sticker_vinil_impermeavel_one_piece_luffy_1545_2_d706c3df5c66b82a24e11f8abc8333d4-removebg-preview.png"),
     require("../assets/images/image-removebg-preview (2).png"),
     require("../assets/images/image-removebg-preview (1).png"),
-    require("../assets/images/images-removebg-preview.png"),
+    require("../assets/images/image-removebg-preview.png"),
     require("../assets/images/37-375472_transparent-one-piece-png-one-piece-chopper-stickers-removebg-preview.png"),
   ]);
 

@@ -53,3 +53,11 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+  <Tabs.Screen
+  name="habilidades"
+  options={{
+    title: 'Habilidades',
+    tabBarIcon: ({ focused }) => (
+  <EvilIcons name="heart" size={24} color={focused ? "#c9892a" : "#ffffff"} />    ),
+  }}
+/>
